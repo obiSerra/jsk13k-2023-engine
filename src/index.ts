@@ -1,44 +1,14 @@
-import { GameLoop, UpdateCb } from "./gameLoop";
-import { Stage, IStage } from "./stage";
 import "./assets/main.scss";
+import { IVec, RenderFn } from "./contracts";
+import { BaseEntity } from "./entities";
+import { GameLoop } from "./gameLoop";
+import { preRender } from "./preRender";
+import { Stage } from "./stage";
 
-type IVec = [number, number];
+//
+// -------------- All the folowing code is just for testing the engine -----------------------------
+//
 
-interface IEntity {
-  pos: IVec;
-  stage: IStage;
-  render(): void;
-  update(delta: number): void;
-}
-
-interface IDynEntity extends IEntity {
-  v: IVec;
-}
-
-const mXs = (l: number, d: number) => {
-  return l * (d / 1000);
-  //   return Math.round(l);
-};
-
-class BaseEntity implements IDynEntity {
-  stage: IStage;
-  pos: IVec;
-  v: IVec;
-
-  constructor(stage: IStage, pos: IVec) {
-    this.stage = stage;
-    this.pos = pos;
-    this.v = [0, 0];
-  }
-
-  render() {}
-  update(d: number) {
-    const [x, y] = this.pos;
-    const [vx, vy] = this.v;
-
-    this.pos = [x + mXs(vx, d), y + mXs(vy, d)];
-  }
-}
 const spots = [
   [0, -5],
   [-2, -11],
@@ -49,15 +19,15 @@ const spots = [
   [12, -5],
 ];
 
-const drawMush = (ctx, pos) => {
+const drawMush: RenderFn = (ctx, pos) => {
   let [x, y] = pos;
   x = Math.round(x);
   y = Math.round(y);
-  const m = new Path2D();
   const w = 8;
   const tw = 12;
   const sr = 3;
   // bottom part
+  const m = new Path2D();
   m.moveTo(x - w, y);
   m.arc(x, y, w, 0, Math.PI, false);
   ctx.fillStyle = "#fff";
@@ -71,8 +41,7 @@ const drawMush = (ctx, pos) => {
   ctx.fillStyle = "red";
   ctx.fill(mt);
   ctx.stroke(mt);
-  //TODO  Clip not working !!!
-  //   const clip = new Path2D();
+
   ctx.save();
   ctx.clip(mt);
   //   ctx.clip(clip);
@@ -88,13 +57,21 @@ const drawMush = (ctx, pos) => {
   ctx.restore();
 };
 
+const stage = new Stage();
+const gl = new GameLoop(stage);
+
+const entities = [];
+
+const entitiesNum = 400;
+
+const mushImg = preRender([28, 26], drawMush);
 class AnimationTest extends BaseEntity {
   constructor(v: IVec, ...args: ConstructorParameters<typeof BaseEntity>) {
     super(...args);
     this.v = v;
   }
   render() {
-    drawMush(this.stage.ctx, this.pos);
+    this.stage.ctx.drawImage(mushImg, this.pos[0], this.pos[1]);
   }
   update(d) {
     const [x, y] = this.pos;
@@ -107,13 +84,6 @@ class AnimationTest extends BaseEntity {
     super.update(d);
   }
 }
-
-const stage = new Stage();
-const gl = new GameLoop(stage);
-
-const entities = [];
-
-const entitiesNum = 50;
 
 for (let i = 0; i < entitiesNum; i++) {
   entities.push(

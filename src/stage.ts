@@ -1,9 +1,5 @@
+import { IStage } from "./contracts";
 import { d } from "./dom";
-
-export interface IStage {
-  canvas: HTMLCanvasElement;
-  ctx: CanvasRenderingContext2D;
-}
 
 export class Stage implements IStage {
   canvas: HTMLCanvasElement;

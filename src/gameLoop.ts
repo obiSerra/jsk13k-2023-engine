@@ -1,5 +1,5 @@
+import { IStage } from "./contracts";
 import { ra, d } from "./dom";
-import { IStage } from "./stage";
 
 export type UpdateCb = (delta: number) => void;
 const emptyCb: UpdateCb = (_) => {};
