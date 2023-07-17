@@ -1,15 +1,16 @@
 export type IVec = [number, number];
 export interface IEntity {
-  pos: IVec;
   stage: IStage;
-  render(): void;
-  update(delta: number): void;
+  hasRender: boolean;
+  pos?: IVec;
+  v?: IVec;
+  box?: IVec;
+  lastMv: IVec;
+  isColliding: boolean;
+  render?(): void;
+  update?(delta: number): void;
+  onCollide(e: IEntity): void;
 }
-
-export interface IDynEntity extends IEntity {
-  v: IVec;
-}
-
 export interface IStage {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
