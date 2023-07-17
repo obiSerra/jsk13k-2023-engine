@@ -1,29 +1,6 @@
 import { IEntity, IStage, IVec } from "./contracts";
 import { mXs } from "./utils";
 
-export const isCollide = (a: IVec, as: IVec, b: IVec, bs: IVec) => {
-  const [ax, ay] = a;
-  const [aw, ah] = as;
-  const [bx, by] = b;
-  const [bw, bh] = bs;
-
-  return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
-};
-
-export const collideSize = (a: IVec, as: IVec, b: IVec, bs: IVec) => {
-  const [ax, ay] = a;
-  const [aw, ah] = as;
-  const [bx, by] = b;
-  const [bw, bh] = bs;
-  if (isCollide(a, as, b, bs)) {
-    return (
-      ax - (bx + bw) + (bx - (ax + aw)) + (ay - (by + bh)) + (by - (ay + ah))
-    );
-  } else {
-    return 0;
-  }
-};
-
 export class BaseEntity implements IEntity {
   stage: IStage;
   pos: IVec;

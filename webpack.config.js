@@ -9,7 +9,7 @@ const HTMLInlineCSSWebpackPlugin =
 
 module.exports = {
   entry: "./src/index.ts",
-  mode: process.MODE === "prod" ? "production" : "development",
+  mode: "production",
   module: {
     rules: [
       {

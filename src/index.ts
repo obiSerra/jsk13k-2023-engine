@@ -1,6 +1,7 @@
 import "./assets/main.scss";
-import { IEntity, IVec, RenderFn } from "./contracts";
-import { BaseEntity, collideSize, isCollide } from "./entities";
+import { resolveCollisions } from "./collisions";
+import { IEntity, RenderFn } from "./contracts";
+import { BaseEntity } from "./entities";
 import { GameLoop } from "./gameLoop";
 import { preRender } from "./preRender";
 import { Stage } from "./stage";
@@ -104,42 +105,6 @@ for (let i = 0; i < entitiesNum; i++) {
   anim.box = [28, 25];
   entities.push(anim);
 }
-
-const resolveCollisions = (entities: IEntity[], dept = 0) => {
-  for (let i = 0; i < entities.length; i++) {
-    const a = entities[i];
-    for (let j = 0; j < entities.length; j++) {
-      if (i !== j) {
-        const b = entities[j];
-        const willCollide = isCollide(
-          [a.pos[0] + a.lastMv[0] * 1.5, a.pos[1] + a.lastMv[1] * 1.5],
-          a.box,
-          [b.pos[0] + b.lastMv[0] * 1.5, b.pos[1] + b.lastMv[1] * 1.5],
-          b.box
-        );
-        const actualCollide = isCollide(
-          [a.pos[0], a.pos[1]],
-          a.box,
-          [b.pos[0], b.pos[1]],
-          b.box
-        );
-
-        if (actualCollide && a.v) {
-          let nPos: IVec = a.pos;
-          do {
-            const mvX = -a.lastMv[0] || 1;
-            const mvY = -a.lastMv[0] || 1;
-            nPos = [nPos[0] + mvX, nPos[1] + mvY];
-          } while (isCollide(nPos, a.box, [b.pos[0], b.pos[1]], b.box));
-          a.pos = nPos;
-        } else if (!actualCollide && willCollide && a.v) {
-          // Trigger on Collide!!!!
-          a.onCollide(b);
-        }
-      }
-    }
-  }
-};
 
 gl.onUpdate((delta) => {
   const canCollide = entities.filter((e) => !!e.box);
