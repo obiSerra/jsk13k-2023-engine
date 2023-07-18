@@ -7,9 +7,11 @@ export interface IEntity {
   box?: IVec;
   lastMv: IVec;
   isColliding: boolean;
+  mass?: number;
   render?(): void;
   update?(delta: number): void;
   onCollide(e: IEntity): void;
+  destroy();
 }
 export interface IStage {
   canvas: HTMLCanvasElement;

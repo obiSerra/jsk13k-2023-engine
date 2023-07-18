@@ -1,4 +1,26 @@
+.stage-container {
+  position: relative;
+}
 canvas {
   border: 1px solid tomato;
   background-color: #ccc;
+}
+
+.menu {
+  display: none;
+  &.active {
+    position: absolute;
+    display: block;
+    top: 0;
+  }
+}
+
+.pause {
+  display: none;
+  &.active {
+    position: absolute;
+    display: block;
+    top: 0;
+    left: 750px;
+  }
 }

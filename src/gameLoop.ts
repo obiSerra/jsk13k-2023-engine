@@ -2,7 +2,10 @@ import { IStage } from "./contracts";
 import { ra, d } from "./dom";
 
 export type UpdateCb = (delta: number) => void;
-const emptyCb: UpdateCb = (_) => {};
+
+export const INIT_ST = "init";
+export const RUNNING_ST = "running";
+export const PAUSED_ST = "paused";
 
 export class GameLoop {
   uFps = 1000 / 30;
@@ -11,17 +14,32 @@ export class GameLoop {
   stage: IStage;
   updateCb: UpdateCb;
   renderCb: UpdateCb;
+  startCb: () => void;
+  pauseCb: () => void;
+  resumeCb: () => void;
+
   lastRenderCall: number;
   lastUpdateCall: number;
   renderFps: number;
   updateFps: number;
+  state: string;
   constructor(stage: IStage) {
+    this.state = INIT_ST;
     this.stage = stage;
     this.lastRenderCall = 0;
     this.lastUpdateCall = 0;
     this.renderFps = 0;
     this.updateFps = 0;
     this.debugInfoCreate();
+  }
+  onStart(startCb: () => void) {
+    this.startCb = startCb;
+  }
+  onPause(pauseCb: () => void) {
+    this.pauseCb = pauseCb;
+  }
+  onResume(resumeCb: () => void) {
+    this.resumeCb = resumeCb;
   }
 
   onUpdate(updateCb: UpdateCb) {
@@ -32,7 +50,19 @@ export class GameLoop {
     if (onRenderCb) this.renderCb = onRenderCb;
   }
   start() {
+    this.state = RUNNING_ST;
+    if (this.startCb) this.startCb();
     this.mainLoop();
+  }
+
+  pause() {
+    this.state = PAUSED_ST;
+    if (this.pauseCb) this.pauseCb();
+  }
+
+  resume() {
+    this.state = RUNNING_ST;
+    if (this.resumeCb) this.resumeCb();
   }
 
   renderLoop() {
@@ -45,19 +75,20 @@ export class GameLoop {
       this.lastRenderCall = time;
 
       this.renderCb(delta);
-
       this.renderLoop();
     });
   }
 
   updateLoop() {
     setTimeout(() => {
-      const now = +new Date();
+      if (this.state === RUNNING_ST) {
+        const now = +new Date();
 
-      const delta = now - this.lastUpdateCall;
-      this.updateFps = Math.floor(1000 / delta);
-      this.lastUpdateCall = now;
-      this.updateCb(delta);
+        const delta = now - this.lastUpdateCall;
+        this.updateFps = Math.floor(1000 / delta);
+        this.lastUpdateCall = now;
+        this.updateCb(delta);
+      }
 
       this.updateLoop();
     }, this.uFps);
