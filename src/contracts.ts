@@ -19,3 +19,20 @@ export interface IStage {
 }
 
 export type RenderFn = (ctx: CanvasRenderingContext2D, pos: IVec) => void;
+
+export type SpriteFrame = {
+  frames: HTMLImageElement[];
+  changeTime: number;
+};
+
+export type Sprite = {
+  [key: string]: SpriteFrame;
+};
+
+export type SpriteAnimator = {
+  charSprite: Sprite;
+  spriteTime: number;
+  currentFrame: number;
+  direction: number;
+  currentSprite: string;
+};

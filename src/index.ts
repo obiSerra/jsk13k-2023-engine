@@ -1,6 +1,6 @@
 import "./assets/main.scss";
 import { resolveCollisions } from "./collisions";
-import { IEntity, IVec, RenderFn } from "./contracts";
+import { IEntity, IVec, RenderFn, Sprite } from "./contracts";
 import { BaseEntity } from "./entities";
 import { GameLoop, INIT_ST, PAUSED_ST } from "./gameLoop";
 import { preRender } from "./preRender";
@@ -266,74 +266,48 @@ function demo3() {
   const run1 = preRender([32, 32], genDrawCharacter(image3));
   const run2 = preRender([32, 32], genDrawCharacter(image4));
 
-  const charSprite = {
+
+  const charSprite: Sprite = {
     idle: { frames: [idle1, idle2], changeTime: 500 },
     run: { frames: [run1, run2], changeTime: 100 },
   };
+
   class AnimationTest extends BaseEntity {
-    spriteTime: number;
-    currentFrame: number;
-    currentSprite: string;
-    direction: number;
     constructor(...args: ConstructorParameters<typeof BaseEntity>) {
       super(...args);
-      this.spriteTime = 0;
-      this.currentFrame = 0;
-      this.direction = 1;
+
+      const sa = { charSprite, spriteTime: 0, currentFrame: 0, direction: 1, currentSprite: "idle" };
+      this.setSpriteAnimator(sa);
 
       document.addEventListener("keydown", e => {
         if (e.key === "ArrowLeft") {
           // this.v[0] = Math.max(this.v[0] - 10, -100);
           this.v[0] = -70;
           console.log("left", this.v[0]);
-          this.direction = 1;
-          this.currentSprite = "run";
+          this.spriteAnimator.direction = 1;
+          this.spriteAnimator.currentSprite = "run";
         } else if (e.key === "ArrowRight") {
           // this.v[0] = Math.max(this.v[0] - 10, -100);
           this.v[0] = 70;
           console.log("Right", this.v[0]);
-          this.currentSprite = "run";
-          this.direction = -1;
+          this.spriteAnimator.currentSprite = "run";
+          this.spriteAnimator.direction = -1;
         }
       });
 
       document.addEventListener("keyup", e => {
         if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
           this.v[0] = 0;
-          this.currentSprite = "idle";
+          this.spriteAnimator.currentSprite = "idle";
         }
       });
     }
-    renderSprite(delta, spriteName: string) {
-      const sprite = charSprite[spriteName];
-      if (this.spriteTime > sprite.changeTime) {
-        this.spriteTime = 0;
-        this.currentFrame = (this.currentFrame + 1) % sprite.frames.length;
-      }
-
-      this.stage.ctx.save();
-      const flip = this.direction === -1;
-      this.stage.ctx.scale(flip ? -1 : 1, 1);
-
-      this.stage.ctx.drawImage(
-        sprite.frames[this.currentFrame],
-        flip ? this.pos[0] * -1 - sprite.frames[this.currentFrame].width : this.pos[0],
-        this.pos[1],
-        sprite.frames[this.currentFrame].width,
-        sprite.frames[this.currentFrame].height
-      );
-      this.stage.ctx.restore();
-    }
-
     render(delta) {
-      this.spriteTime += delta;
+      this.spriteAnimator.spriteTime += delta;
 
-      const spriteName = this.currentSprite || "idle";
+      const spriteName = this.spriteAnimator.currentSprite || "idle";
       this.renderSprite(delta, spriteName);
-      // drawCharacter(this.stage.ctx, this.pos);
       super.render(delta);
-
-      // if (this.box)
     }
     update(d: number) {
       const [x, y] = this.pos;
