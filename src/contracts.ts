@@ -8,7 +8,7 @@ export interface IEntity {
   lastMv: IVec;
   isColliding: boolean;
   mass?: number;
-  render?(): void;
+  render?(t: number): void;
   update?(delta: number): void;
   onCollide(e: IEntity): void;
   destroy();

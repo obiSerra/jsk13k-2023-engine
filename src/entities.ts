@@ -34,7 +34,7 @@ export class BaseEntity implements IEntity {
     gravity(this, d);
     this.pos = [x + mXs(vx, d), y + mXs(vy, d)];
   }
-  render() {
+  render(t: number) {
     this.boxcolor = this.isColliding ? "red" : "lime";
     if (this.box) {
       const [w, h] = this.box;
