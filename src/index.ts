@@ -1,10 +1,11 @@
 import "./assets/main.scss";
 import { resolveCollisions } from "./collisions";
 import { IEntity, IVec, RenderFn, Sprite } from "./contracts";
+import { demo3 } from "./demo3";
 import { BaseEntity } from "./entities";
 import { GameLoop, INIT_ST, PAUSED_ST } from "./gameLoop";
-import { preRender } from "./preRender";
-import { image1, image2, image3, image4 } from "./pxImages/testImage";
+import { images } from "./pxImages/testImage";
+import { genDrawCharacter, preRender, hydrateImage } from "./rendering";
 import { Stage } from "./stage";
 
 class Menu {
@@ -45,7 +46,7 @@ mainMenu.addOnClick("#demo2-run", e => {
 });
 mainMenu.addOnClick("#demo3-run", e => {
   e.preventDefault();
-  demo3();
+  demo3(stage, gl);
   if (gl.state === INIT_ST) gl.start();
   else if (gl.state === PAUSED_ST) gl.resume();
 });
@@ -237,109 +238,5 @@ function demo2() {
   });
 }
 
-function demo3() {
-  function genDrawCharacter(charGrid: string[][]) {
-    const drawCharacter: RenderFn = (ctx, pos) => {
-      const px = 2;
-      let [xInit, yInit] = pos;
-      xInit -= (charGrid[0].length * px) / 2;
-      yInit -= (charGrid.length * px) / 2;
-      for (let r = 0; r < charGrid.length; r++) {
-        for (let c = 0; c < charGrid[r].length; c++) {
-          if (charGrid[r][c] !== "n") {
-            const x = xInit + c * px;
-            const y = yInit + r * px;
-            ctx.beginPath();
-            ctx.fillStyle = charGrid[r][c];
-            ctx.fillRect(x, y, px, px);
-            ctx.closePath();
-          }
-        }
-      }
-    };
-    return drawCharacter;
-  }
-
-  const idle1 = preRender([32, 32], genDrawCharacter(image1));
-  const idle2 = preRender([32, 32], genDrawCharacter(image2));
-
-  const run1 = preRender([32, 32], genDrawCharacter(image3));
-  const run2 = preRender([32, 32], genDrawCharacter(image4));
-
-
-  const charSprite: Sprite = {
-    idle: { frames: [idle1, idle2], changeTime: 500 },
-    run: { frames: [run1, run2], changeTime: 100 },
-  };
-
-  class AnimationTest extends BaseEntity {
-    constructor(...args: ConstructorParameters<typeof BaseEntity>) {
-      super(...args);
-
-      const sa = { charSprite, spriteTime: 0, currentFrame: 0, direction: 1, currentSprite: "idle" };
-      this.setSpriteAnimator(sa);
-
-      document.addEventListener("keydown", e => {
-        if (e.key === "ArrowLeft") {
-          // this.v[0] = Math.max(this.v[0] - 10, -100);
-          this.v[0] = -70;
-          console.log("left", this.v[0]);
-          this.spriteAnimator.direction = 1;
-          this.spriteAnimator.currentSprite = "run";
-        } else if (e.key === "ArrowRight") {
-          // this.v[0] = Math.max(this.v[0] - 10, -100);
-          this.v[0] = 70;
-          console.log("Right", this.v[0]);
-          this.spriteAnimator.currentSprite = "run";
-          this.spriteAnimator.direction = -1;
-        }
-      });
-
-      document.addEventListener("keyup", e => {
-        if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-          this.v[0] = 0;
-          this.spriteAnimator.currentSprite = "idle";
-        }
-      });
-    }
-    render(delta) {
-      this.spriteAnimator.spriteTime += delta;
-
-      const spriteName = this.spriteAnimator.currentSprite || "idle";
-      this.renderSprite(delta, spriteName);
-      super.render(delta);
-    }
-    update(d: number) {
-      const [x, y] = this.pos;
-      if (x < 0 || x > this.stage.canvas.width) {
-        this.v[0] = -this.v[0];
-      }
-      if (y < 0 || y > this.stage.canvas.height) {
-        this.v[1] = -this.v[1];
-      }
-      super.update(d);
-    }
-    onCollide(e: IEntity) {
-      this.v = [-this.v[0], -this.v[1]];
-    }
-  }
-  const entities = [];
-
-  const entitiesNum = 1;
-  for (let i = 0; i < entitiesNum; i++) {
-    const anim = new AnimationTest(stage, [stage.canvas.width / 2, stage.canvas.height / 2], [0, 0]);
-    anim.box = [32, 32];
-    entities.push(anim);
-  }
-
-  gl.onUpdate(delta => {
-    const canCollide = entities.filter(e => !!e.box);
-    resolveCollisions(canCollide);
-    entities.filter(e => typeof e.update === "function").forEach(e => e.update(delta));
-  });
-  gl.onRender(t => {
-    entities.filter(e => e.hasRender && typeof e.render === "function").forEach(e => e.render(t));
-  });
-}
-demo3();
+demo3(stage, gl);
 gl.start();

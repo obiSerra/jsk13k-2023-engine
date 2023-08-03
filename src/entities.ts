@@ -1,4 +1,4 @@
-import { IEntity, IStage, IVec, Sprite, SpriteAnimator } from "./contracts";
+import { GameStateAPI, IEntity, IStage, IVec, Sprite, SpriteAnimator } from "./contracts";
 import { mXs } from "./utils";
 
 const gravity = (e: IEntity, d: number) => {
@@ -9,7 +9,9 @@ const gravity = (e: IEntity, d: number) => {
 
 const spriteAnimator = {};
 
+// TODO simplify this
 export class BaseEntity implements IEntity {
+  ID: string;
   stage: IStage;
   pos: IVec;
   v: IVec;
@@ -22,6 +24,7 @@ export class BaseEntity implements IEntity {
 
   spriteAnimator: SpriteAnimator;
   constructor(stage: IStage, pos?: IVec, v?: IVec) {
+    this.ID = Math.random().toString(36).substr(2, 9);
     this.hasRender = true;
     this.stage = stage;
     this.pos = pos;
@@ -35,7 +38,7 @@ export class BaseEntity implements IEntity {
     this.spriteAnimator = spriteAnimator;
   }
 
-  update(d: number) {
+  update(d: number, gameStateApi?: GameStateAPI) {
     if (!this.pos || !this.v) return;
     const [x, y] = this.pos;
     const [vx, vy] = this.v;
@@ -57,13 +60,20 @@ export class BaseEntity implements IEntity {
     const flip = sa.direction === -1;
     this.stage.ctx.scale(flip ? -1 : 1, 1);
 
+    const positionX = flip ? this.pos[0] * -1 - sprite.frames[sa.currentFrame].width : this.pos[0];
+
     this.stage.ctx.drawImage(
       sprite.frames[sa.currentFrame],
-      flip ? this.pos[0] * -1 - sprite.frames[sa.currentFrame].width : this.pos[0],
+      positionX,
       this.pos[1],
       sprite.frames[sa.currentFrame].width,
       sprite.frames[sa.currentFrame].height
     );
+    this.stage.ctx.strokeStyle = "red";
+
+    this.stage.ctx.arc(positionX, this.pos[1], 2, 0, 2 * Math.PI);
+    this.stage.ctx.stroke();
+    
     this.stage.ctx.restore();
   }
   render(t: number) {
