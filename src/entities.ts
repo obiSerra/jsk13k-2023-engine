@@ -131,12 +131,14 @@ export class BoxColliderComponent implements IComponent {
   trigger: boolean;
   onCollide?: (e: IEntity) => void;
   onCollideFn?: (e: IEntity) => void;
+  isColliding: boolean;
 
   constructor(box: IVec, onCollide?: (e: IEntity) => void) {
     this.type = "collider";
     this.box = box;
     this.trigger = true;
     this.onCollideFn = onCollide;
+    this.isColliding = false;
   }
   onInit(e: IEntity): void {
     this.onCollide = this.onCollideFn?.bind(e) || null;
@@ -163,8 +165,6 @@ export class SpriteRenderComponent implements IComponent {
   time: number;
   currentFrame: number;
   currentAnimation: string;
-
-  pos: IVec;
 
   constructor(sprite: Sprite, defaultAnimation: string) {
     this.type = "render";
@@ -208,6 +208,27 @@ export class SpriteRenderComponent implements IComponent {
   }
 }
 
+export class ImgRenderComponent implements IComponent {
+  type: ComponentType;
+  stage: IStage;
+  image: HTMLImageElement;
+
+  pos: IVec;
+
+  constructor(image: HTMLImageElement) {
+    this.type = "render";
+    this.image = image;
+  }
+  onInit(e: IEntity): void {
+    this.stage = e.stage;
+  }
+
+  onRender(e: IEntity, delta: number): void {
+    const pos = (e.components["position"] as PositionComponent).p;
+    this.stage.ctx.drawImage(this.image, pos[0], pos[1]);
+  }
+}
+
 export class ComponentBaseEntity implements IEntity {
   ID: string;
   stage: IStage;
@@ -224,7 +245,7 @@ export class ComponentBaseEntity implements IEntity {
     this.componentList().forEach(c => this.initComponent(c.type));
   }
   initComponent(name: string) {
-    console.log("init component", name);
+    // console.log("init component", name);
     if (this.components[name].onInit) this.components[name].onInit(this);
   }
   componentList() {

@@ -41,14 +41,20 @@ export const resolveCollisions = (entities: IEntity[]) => {
   }
 };
 
-export const resolveCollisionsComponent = (entities: IEntity[]) => {
+export const resolveCollisionsComponent = (
+  entities: IEntity[],
+  onCollideOverride: (e: IEntity) => void | null = null
+) => {
   for (let i = 0; i < entities.length; i++) {
     const a = entities[i];
+    let aCollide = false;
     const {
       p: [aX, aY],
       lp: [aXl, aYl],
     } = a.getComponent<PositionComponent>("position");
-    const { box: aBox, onCollide } = a.getComponent<BoxColliderComponent>("collider");
+    let { box: aBox, onCollide } = a.getComponent<BoxColliderComponent>("collider");
+
+    if (onCollideOverride) onCollide = onCollideOverride;
 
     for (let j = 0; j < entities.length; j++) {
       if (i !== j) {
@@ -66,6 +72,7 @@ export const resolveCollisionsComponent = (entities: IEntity[]) => {
         // );
         const actualCollide = isCollide([aX, aY], aBox, [bX, bY], bBox);
         if (actualCollide && !!onCollide) {
+          aCollide = true;
           onCollide(b);
         }
 
@@ -83,5 +90,7 @@ export const resolveCollisionsComponent = (entities: IEntity[]) => {
         // }
       }
     }
+
+    a.getComponent<BoxColliderComponent>("collider").isColliding = aCollide;
   }
 };

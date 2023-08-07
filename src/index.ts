@@ -1,8 +1,14 @@
 import "./assets/main.scss";
-import { resolveCollisions } from "./collisions";
+import { resolveCollisions, resolveCollisionsComponent } from "./collisions";
 import { IEntity, IVec, RenderFn, Sprite } from "./contracts";
 import { demo3 } from "./demo3";
-import { BaseEntity } from "./entities";
+import {
+  BaseEntity,
+  BoxColliderComponent,
+  ComponentBaseEntity,
+  ImgRenderComponent,
+  PositionComponent,
+} from "./entities";
 import { GameLoop, INIT_ST, PAUSED_ST } from "./gameLoop";
 import { images } from "./pxImages/testImage";
 import { genDrawCharacter, preRender, hydrateImage } from "./rendering";
@@ -33,7 +39,7 @@ const mainMenu = new Menu(".main-menu");
 
 mainMenu.addOnClick("#demo1-run", e => {
   e.preventDefault();
-  demo1();
+  demo1(stage, gl);
   if (gl.state === INIT_ST) gl.start();
   else if (gl.state === PAUSED_ST) gl.resume();
 });
@@ -124,56 +130,59 @@ gl.onPause(() => {
   mainMenu.show();
 });
 
-function demo1() {
-  class AnimationTest extends BaseEntity {
-    constructor(...args: ConstructorParameters<typeof BaseEntity>) {
-      super(...args);
-    }
-    render(t) {
-      this.stage.ctx.drawImage(mushImg, this.pos[0], this.pos[1]);
-      super.render(t);
+function demo1(stage, gl) {
+  class MushEntity extends ComponentBaseEntity {
+    isColliding: boolean;
+    constructor(stage: Stage, p: IVec) {
+      const v: IVec = [Math.floor(Math.random() * 60) - 30, Math.floor(Math.random() * 60) - 30];
+      const position = new PositionComponent(p, v);
+      const render = new ImgRenderComponent(mushImg);
+      const box = new BoxColliderComponent([32, 32], () => {
+        const pos = this.components["position"] as PositionComponent;
+        const c = this.getComponent<BoxColliderComponent>("collider");
+        if (!c.isColliding) {
+          pos.p = [...pos.lp];
+          pos.v = [-pos.v[0], -pos.v[1]];
+        }
+        this.isColliding = true;
+      });
 
-      // if (this.box)
+      super(stage, [position, render, box]);
+      this.isColliding = false;
     }
     update(d: number) {
-      const [x, y] = this.pos;
+      const { p, v } = this.getComponent<PositionComponent>("position");
+      const [x, y] = p;
+      // this.isColliding = false;
+      // TODO should consider the size of the image
       if (x < 0 || x > this.stage.canvas.width) {
-        this.v[0] = -this.v[0];
+        v[0] = -v[0];
       }
       if (y < 0 || y > this.stage.canvas.height) {
-        this.v[1] = -this.v[1];
+        v[1] = -v[1];
       }
       super.update(d);
-    }
-    onCollide(e: IEntity) {
-      this.v = [-this.v[0], -this.v[1]];
     }
   }
   const entities = [];
 
-  const entitiesNum = 100;
+  const entitiesNum = 200;
   for (let i = 0; i < entitiesNum; i++) {
-    const anim = new AnimationTest(
-      stage,
-      [
-        Math.floor(Math.random() * stage.canvas.width),
-        Math.floor(Math.random() * stage.canvas.height),
-        //   stage.canvas.width / 2,
-        //   stage.canvas.height / 2,
-      ],
-      [Math.floor(Math.random() * 60) - 30, Math.floor(Math.random() * 60) - 30]
-    );
-    anim.box = [28, 25];
+    const p: IVec = [Math.floor(Math.random() * stage.canvas.width), Math.floor(Math.random() * stage.canvas.height)];
+    const anim = new MushEntity(stage, p);
+
     entities.push(anim);
   }
 
   gl.onUpdate(delta => {
-    const canCollide = entities.filter(e => !!e.box);
-    resolveCollisions(canCollide);
+    const canCollide = entities.filter(e => !!e.components["collider"]);
+
+    // to update
+    resolveCollisionsComponent(canCollide);
     entities.filter(e => typeof e.update === "function").forEach(e => e.update(delta));
   });
   gl.onRender(t => {
-    entities.filter(e => e.hasRender && typeof e.render === "function").forEach(e => e.render(t));
+    entities.filter(e => typeof e.render === "function").forEach(e => e.render(t));
   });
 }
 
@@ -238,5 +247,5 @@ function demo2() {
   });
 }
 
-demo3(stage, gl);
+demo1(stage, gl);
 gl.start();
