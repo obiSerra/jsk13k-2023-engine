@@ -74,7 +74,7 @@ export class GameLoop {
       this.renderDebug();
       this.lastRenderCall = time;
 
-      this.renderCb(delta);
+      if (this.renderCb) this.renderCb(delta);
       this.renderLoop();
     });
   }
@@ -87,7 +87,7 @@ export class GameLoop {
         const delta = now - this.lastUpdateCall;
         this.updateFps = Math.floor(1000 / delta);
         this.lastUpdateCall = now;
-        this.updateCb(delta);
+        if (this.updateCb) this.updateCb(delta);
       }
 
       this.updateLoop();

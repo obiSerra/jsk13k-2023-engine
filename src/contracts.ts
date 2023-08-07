@@ -1,6 +1,6 @@
 export type IVec = [number, number];
 
-export type ComponentType = "position" | "control" | "collider" | "render";
+export type ComponentType = "position" | "control" | "collider" | "render" | "gravity";
 
 export interface IComponent {
   type: ComponentType;

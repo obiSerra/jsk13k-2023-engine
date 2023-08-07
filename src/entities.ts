@@ -9,97 +9,6 @@ const gravity = (e: IEntity, d: number) => {
 
 const spriteAnimator = {};
 
-// TODO simplify this
-export class BaseEntity implements IEntity {
-  ID: string;
-  components: { [key: string]: IComponent };
-  stage: IStage;
-
-  pos: IVec;
-  v: IVec;
-  lastMv: IVec;
-  hasRender: boolean;
-  box: IVec;
-  boxcolor: string;
-  isColliding: boolean;
-  mass?: number;
-
-  spriteAnimator: SpriteAnimator;
-  constructor(stage: IStage, pos?: IVec, v?: IVec) {
-    this.ID = Math.random().toString(36).substr(2, 9);
-    this.components = {};
-    this.stage = stage;
-
-    this.hasRender = true;
-    this.pos = pos;
-    this.v = v;
-    this.boxcolor = "lime";
-    this.lastMv = [0, 0];
-    this.isColliding = false;
-  }
-
-  setSpriteAnimator(spriteAnimator: SpriteAnimator) {
-    this.spriteAnimator = spriteAnimator;
-  }
-
-  update(d: number, gameStateApi?: GameStateAPI) {
-    if (!this.pos || !this.v) return;
-    const [x, y] = this.pos;
-    const [vx, vy] = this.v;
-    this.lastMv = [mXs(vx, d), mXs(vy, d)];
-    gravity(this, d);
-    this.pos = [x + mXs(vx, d), y + mXs(vy, d)];
-  }
-  renderSprite(delta, spriteName: string) {
-    if (!this.spriteAnimator) return;
-    const sa = this.spriteAnimator;
-    const charSprite = sa.charSprite;
-    const sprite = charSprite[spriteName];
-    if (sa.spriteTime > sprite.changeTime) {
-      sa.spriteTime = 0;
-      sa.currentFrame = (sa.currentFrame + 1) % sprite.frames.length;
-    }
-
-    this.stage.ctx.save();
-    const flip = sa.direction === -1;
-    this.stage.ctx.scale(flip ? -1 : 1, 1);
-
-    const positionX = flip ? this.pos[0] * -1 - sprite.frames[sa.currentFrame].width : this.pos[0];
-
-    this.stage.ctx.drawImage(
-      sprite.frames[sa.currentFrame],
-      positionX,
-      this.pos[1],
-      sprite.frames[sa.currentFrame].width,
-      sprite.frames[sa.currentFrame].height
-    );
-    this.stage.ctx.strokeStyle = "red";
-
-    this.stage.ctx.arc(positionX, this.pos[1], 2, 0, 2 * Math.PI);
-    this.stage.ctx.stroke();
-
-    this.stage.ctx.restore();
-  }
-  render(t: number) {
-    this.boxcolor = this.isColliding ? "red" : "lime";
-    if (this.box) {
-      const [w, h] = this.box;
-      this.stage.ctx.beginPath();
-      this.stage.ctx.rect(this.pos[0], this.pos[1], w, h);
-      this.stage.ctx.strokeStyle = this.boxcolor;
-      this.stage.ctx.stroke();
-      // if (this.boxcolor !== "lime") debugger;
-    }
-    return;
-  }
-  onCollide(e: IEntity) {}
-  destroy() {}
-
-  getComponent<T extends IComponent>(type: ComponentType): T {
-    return null;
-  }
-}
-
 export class PositionComponent implements IComponent {
   type: "position";
   p: IVec;
@@ -226,6 +135,24 @@ export class ImgRenderComponent implements IComponent {
   onRender(e: IEntity, delta: number): void {
     const pos = (e.components["position"] as PositionComponent).p;
     this.stage.ctx.drawImage(this.image, pos[0], pos[1]);
+  }
+}
+
+export class GravityComponent implements IComponent {
+  type: ComponentType;
+  gravity: number;
+  ev: number;
+  constructor(gravity: number = 12, ev: number = null) {
+    this.type = "gravity";
+    this.gravity = gravity;
+    this.ev = !!ev ? ev : gravity * 10;
+  }
+  onUpdate(e: IEntity, delta: number): void {
+    const pos = (e.components["position"] as PositionComponent).p;
+    const [x, y] = pos;
+    const v = (e.components["position"] as PositionComponent).v;
+    const accV = Math.max(v[1] + mXs(this.gravity, delta), this.ev);
+    (e.components["position"] as PositionComponent).v = [v[0], accV];
   }
 }
 
