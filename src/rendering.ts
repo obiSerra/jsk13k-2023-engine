@@ -1,4 +1,4 @@
-import { IVec, RenderFn } from "./contracts";
+import { IVec, ImagePxs, ImagePxsMap, ImagePxsRaw, ImagePxsRawMap, RenderFn } from "./contracts";
 
 // Pre-render a complex image inside a temporary canvas
 export const preRender = (dim: IVec, renderFn: RenderFn) => {
@@ -35,8 +35,12 @@ export function genDrawCharacter(charGrid: (string | null)[][], px: number = 2) 
   return drawCharacter;
 }
 
-export const hydrateImage = (images, imageName): (string | null)[][] => {
-  const image = images[imageName];
-  const values = image.map(row => row.map(pixel => images.colors[pixel]));
+export const hydrateImage = (images: ImagePxsRawMap, imageName): ImagePxs => {
+  const image: ImagePxsRaw = images[imageName];
+  const values = image.map(row => row.map(pixel => images.colors[pixel])) as ImagePxs;
   return values;
 };
+export function deepCopy<Type>(arg: Type): Type {
+  return JSON.parse(JSON.stringify(arg));
+}
+export const flipImage = (image: ImagePxs): ImagePxs => deepCopy(image).map(row => row.reverse());

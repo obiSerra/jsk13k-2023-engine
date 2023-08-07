@@ -1,4 +1,7 @@
-export const images = {
+import { ImagePxsMap, ImagePxsRawMap } from "../contracts";
+
+export const images: ImagePxsRawMap = {
+  colors: [null, "#000000", "#f5a623", "#4a90e2", "#d0021b", "#bd10e0", "#9b9b9b", "#61b1de"],
   img1: [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
@@ -81,6 +84,5 @@ export const images = {
     [1, 1, 3, 3, 3, 1, 1, 0, 0, 0],
     [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  ],
-  colors: [null, "#000000", "#f5a623", "#4a90e2", "#d0021b", "#bd10e0", "#9b9b9b", "#61b1de"],
+  ]
 };

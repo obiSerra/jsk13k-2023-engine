@@ -1,6 +1,28 @@
 export type IVec = [number, number];
 
-export interface IEntity {
+export type ComponentType = "position" | "control" | "collider" | "render";
+
+export interface IComponent {
+  type: ComponentType;
+  onInit?(e: IEntity): void;
+  onRender?(e: IEntity, delta: number): void;
+  onUpdate?(e: IEntity, delta: number, gameState?: GameStateAPI): void;
+}
+
+export interface RenderComponent extends IComponent {
+  type: "render";
+}
+
+export interface IEntity extends IEntityOld {
+  ID: string;
+  stage: IStage;
+  components: { [key: string]: IComponent };
+  initComponent?(c: string): void;
+  componentList?(): IComponent[];
+  addComponent?(c: IComponent): void;
+  getComponent<T extends IComponent>(c: string): T;
+}
+export interface IEntityOld {
   ID: string;
   stage: IStage;
   hasRender: boolean;
@@ -12,6 +34,8 @@ export interface IEntity {
   mass?: number;
   render?(t: number): void;
   update?(delta: number, gameState?: GameStateAPI): void;
+  onUpdateStart?(delta: number, gameState?: GameStateAPI): void;
+  onUpdateEnd?(delta: number, gameState?: GameStateAPI): void;
   onCollide(e: IEntity): void;
   destroy();
 }
@@ -51,3 +75,10 @@ export type GameStateAPI = {
   getEntities(): IEntity[];
   getStage(): IStage;
 };
+
+export type ColorMap = { colors: (string | null)[] };
+export type ImagePxsRaw = number[][];
+export type ImagePxsRawMap = { [key: string]: ImagePxsRaw } | ColorMap;
+
+export type ImagePxs = (string | null)[][];
+export type ImagePxsMap = { [key: string]: ImagePxs };
