@@ -1,12 +1,15 @@
 import e = require("express");
 import "./assets/main.scss";
-import { RenderFn } from "./contracts";
+import { IEntity, IVec, RenderFn } from "./contracts";
 import { demo1 } from "./demo1";
 import { demo2 } from "./demo2";
 import { demo3 } from "./demo3";
 import { GameLoop, INIT_ST, PAUSED_ST } from "./gameLoop";
 import { preRender } from "./rendering";
 import { Stage } from "./stage";
+import { d } from "./dom";
+import { PositionComponent, ImgRenderComponent, BoxColliderComponent, SoundComponent } from "./components";
+import { ComponentBaseEntity } from "./entities";
 
 class Menu {
   el: HTMLElement;
@@ -98,6 +101,12 @@ mainMenu.addOnClick("#demo3-run", e => {
   if (gl.state === INIT_ST) gl.start();
   else if (gl.state === PAUSED_ST) gl.resume();
 });
+mainMenu.addOnClick("#demo4-run", e => {
+  e.preventDefault();
+  demo4(stage, gl);
+  if (gl.state === INIT_ST) gl.start();
+  else if (gl.state === PAUSED_ST) gl.resume();
+});
 mainMenu.show();
 
 const stage = new Stage();
@@ -122,4 +131,47 @@ gl.onPause(() => {
   mainMenu.show();
 });
 
-// gl.start();
+function demo4(stage: Stage, gl: GameLoop) {
+  class MusicEntity extends ComponentBaseEntity {
+    constructor(stage: Stage) {
+      const sound = new SoundComponent(["triangle", "sawtooth", "square"]);
+
+      super(stage, [sound]);
+      this.isColliding = false;
+    }
+    play(music): void {
+      // const music = [
+      //   { note: "G0", duration: beat(1), volume, pause: beat(0.5) },
+      //   { note: "G0", duration: beat(1), volume, pause: beat(0.5) },
+      //   { note: "G0", duration: beat(1), volume, pause: beat(0.5) },
+      //   { note: "D#0", duration: beat(1.2), volume },
+      //   { note: "A#0", duration: beat(0.3), volume, pause: beat(0.5) },
+      //   { note: "G0", duration: beat(1), volume },
+      //   { note: "D#0", duration: beat(1.2), volume },
+      //   { note: "A#0", duration: beat(0.3), volume },
+      //   { note: "G0", duration: beat(1), volume, pause: beat(0.5) },
+      //   { note: "D1", duration: beat(1), volume },
+      //   { note: "D1", duration: beat(1), volume },
+      //   { note: "D1", duration: beat(1), volume },
+      //   // { note: "D#0", duration: beat(1.2), volume },
+      //   // { note: "A#0", duration: beat(0.3), volume },
+      //   // { note: "D#0", duration: beat(1), volume },
+      // ];
+
+      this.getComponent<SoundComponent>("sound").play(music);
+    }
+  }
+  const volume = 0.05;
+
+  const beat = (n: number) => n * 300;
+
+  const music = [
+    { note: "G0", duration: beat(6), volume, pause: beat(0.5), channel: 0, start: 0 },
+    { note: "G1", duration: beat(4), volume, pause: beat(0.5), channel: 1, start: beat(2) },
+    { note: "F1", duration: beat(3), volume, pause: beat(0.5), channel: 2, start: beat(3) },
+  ];
+
+  const musicEntity = new MusicEntity(stage);
+
+  musicEntity.play(music);
+}

@@ -1,4 +1,5 @@
 import { resolveCollisions, resolveCollisionsComponent } from "./collisions";
+import { PositionComponent, SpriteRenderComponent, BoxColliderComponent } from "./components";
 import {
   ComponentType,
   GameStateAPI,
@@ -9,7 +10,7 @@ import {
   Sprite,
   SpriteAnimator,
 } from "./contracts";
-import { BoxColliderComponent, ComponentBaseEntity, PositionComponent, SpriteRenderComponent } from "./entities";
+import { ComponentBaseEntity } from "./entities";
 import { images } from "./pxImages/testImage";
 import { flipImage, genDrawCharacter, hydrateImage, preRender } from "./rendering";
 import { Stage } from "./stage";

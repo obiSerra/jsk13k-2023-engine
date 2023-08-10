@@ -1,7 +1,7 @@
 import { resolveCollisionsComponent } from "./collisions";
+import { BoxColliderComponent, ImgRenderComponent, PositionComponent } from "./components";
 import { IVec } from "./contracts";
-import { ComponentBaseEntity, PositionComponent, ImgRenderComponent, BoxColliderComponent } from "./entities";
-import { preRender } from "./rendering";
+import { ComponentBaseEntity } from "./entities";
 import { Stage } from "./stage";
 
 export function demo1(stage, gl, mushImg) {

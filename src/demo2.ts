@@ -1,10 +1,9 @@
+import { PositionComponent, ImgRenderComponent, GravityComponent } from "./components";
 import { IVec } from "./contracts";
-import { ComponentBaseEntity, GravityComponent, ImgRenderComponent, PositionComponent } from "./entities";
+import { ComponentBaseEntity } from "./entities";
 import { Stage } from "./stage";
 
 export function demo2(stage, gl, mushImg) {
-
-
   class MushEntity extends ComponentBaseEntity {
     toRemove: boolean = false;
     constructor(stage: Stage, p: IVec) {
