@@ -1,4 +1,4 @@
-import { resolveCollisionsComponent } from "./api/collisions";
+import { resolveCollisions } from "./api/collisions";
 import { BoxColliderComponent, PositionComponent, SpriteRenderComponent } from "./api/components";
 import { ComponentType, GameStateAPI, IComponent, IEntity, IStage, Sprite } from "./api/contracts";
 import { ComponentBaseEntity } from "./api/entities";
@@ -209,7 +209,7 @@ export function demo3(stage, gl) {
     const canCollide = state.getEntities().filter(e => !!e.components["collider"]);
 
     // to update
-    resolveCollisionsComponent(canCollide);
+    resolveCollisions(canCollide);
     state
       .getEntities()
       .filter(e => typeof e.update === "function")

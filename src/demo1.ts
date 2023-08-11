@@ -1,4 +1,4 @@
-import { resolveCollisionsComponent } from "./api/collisions";
+import { resolveCollisions } from "./api/collisions";
 import { BoxColliderComponent, ImgRenderComponent, PositionComponent } from "./api/components";
 import { IVec } from "./api/contracts";
 import { ComponentBaseEntity } from "./api/entities";
@@ -52,7 +52,7 @@ export function demo1(stage, gl, mushImg) {
     const canCollide = entities.filter(e => !!e.components["collider"]);
 
     // to update
-    resolveCollisionsComponent(canCollide);
+    resolveCollisions(canCollide);
     entities.filter(e => typeof e.update === "function").forEach(e => e.update(delta));
   });
   gl.onRender(t => {
