@@ -1,33 +1,17 @@
-import e = require("express");
+import { SoundComponent } from "./api/components";
+import { RenderFn } from "./api/contracts";
+import { ComponentBaseEntity } from "./api/entities";
+import { GameLoop, INIT_ST, PAUSED_ST } from "./api/gameLoop";
+import { Menu } from "./api/menu";
+import { preRender } from "./api/rendering";
+import { genMusicSheet } from "./api/soundComponent";
+import { Stage } from "./api/stage";
 import "./assets/main.scss";
-import { IEntity, IVec, MusicSheet, NoteData, RenderFn } from "./contracts";
 import { demo1 } from "./demo1";
 import { demo2 } from "./demo2";
 import { demo3 } from "./demo3";
-import { GameLoop, INIT_ST, PAUSED_ST } from "./gameLoop";
-import { preRender } from "./rendering";
-import { Stage } from "./stage";
-import { d } from "./dom";
-import { PositionComponent, ImgRenderComponent, BoxColliderComponent, SoundComponent } from "./components";
-import { ComponentBaseEntity } from "./entities";
-import { genMusicSheet } from "./soundComponent";
 
-class Menu {
-  el: HTMLElement;
-  constructor(selector: string) {
-    this.el = document.querySelector(selector);
-  }
 
-  show() {
-    this.el.classList.add("active");
-  }
-  hide() {
-    this.el.classList.remove("active");
-  }
-  addOnClick(sel: string, cb: (e: Event) => void) {
-    this.el.querySelector(sel).addEventListener("click", cb);
-  }
-}
 
 //
 // -------------- All the folowing code is just for testing the engine -----------------------------

@@ -1,7 +1,6 @@
-import { PositionComponent, BoxColliderComponent } from "./components";
+import { BoxColliderComponent, PositionComponent } from "./components";
 import { IEntity, IVec } from "./contracts";
 
-import { mXs } from "./utils";
 
 export const isCollide = (a: IVec, as: IVec, b: IVec, bs: IVec) => {
   const [ax, ay] = a;

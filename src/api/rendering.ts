@@ -1,4 +1,4 @@
-import { IVec, ImagePxs, ImagePxsMap, ImagePxsRaw, ImagePxsRawMap, RenderFn } from "./contracts";
+import { IVec, ImagePxs, ImagePxsRaw, ImagePxsRawMap, RenderFn } from "./contracts";
 
 // Pre-render a complex image inside a temporary canvas
 export const preRender = (dim: IVec, renderFn: RenderFn) => {

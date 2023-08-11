@@ -1,19 +1,10 @@
-import { resolveCollisions, resolveCollisionsComponent } from "./collisions";
-import { PositionComponent, SpriteRenderComponent, BoxColliderComponent } from "./components";
-import {
-  ComponentType,
-  GameStateAPI,
-  IComponent,
-  IEntity,
-  IGameState,
-  IStage,
-  Sprite,
-  SpriteAnimator,
-} from "./contracts";
-import { ComponentBaseEntity } from "./entities";
+import { resolveCollisionsComponent } from "./api/collisions";
+import { BoxColliderComponent, PositionComponent, SpriteRenderComponent } from "./api/components";
+import { ComponentType, GameStateAPI, IComponent, IEntity, IStage, Sprite } from "./api/contracts";
+import { ComponentBaseEntity } from "./api/entities";
+import { flipImage, genDrawCharacter, hydrateImage, preRender } from "./api/rendering";
+import { Stage } from "./api/stage";
 import { images } from "./pxImages/testImage";
-import { flipImage, genDrawCharacter, hydrateImage, preRender } from "./rendering";
-import { Stage } from "./stage";
 
 class GameState {
   status: string = "loading";

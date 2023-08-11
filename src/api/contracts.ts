@@ -13,18 +13,10 @@ export interface RenderComponent extends IComponent {
   type: "render";
 }
 
-export interface IEntity extends IEntityOld {
+export interface IEntity {
   ID: string;
   stage: IStage;
   components: { [key: string]: IComponent };
-  initComponent?(c: string): void;
-  componentList?(): IComponent[];
-  addComponent?(c: IComponent): void;
-  getComponent<T extends IComponent>(c: string): T;
-}
-export interface IEntityOld {
-  ID: string;
-  stage: IStage;
   hasRender: boolean;
   pos?: IVec;
   v?: IVec;
@@ -38,7 +30,12 @@ export interface IEntityOld {
   onUpdateEnd?(delta: number, gameState?: GameStateAPI): void;
   onCollide(e: IEntity): void;
   destroy();
+  initComponent?(c: string): void;
+  componentList?(): IComponent[];
+  addComponent?(c: IComponent): void;
+  getComponent<T extends IComponent>(c: string): T;
 }
+
 export interface IStage {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;

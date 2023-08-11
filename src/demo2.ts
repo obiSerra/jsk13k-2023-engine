@@ -1,7 +1,7 @@
-import { PositionComponent, ImgRenderComponent, GravityComponent } from "./components";
-import { IVec } from "./contracts";
-import { ComponentBaseEntity } from "./entities";
-import { Stage } from "./stage";
+import { GravityComponent, ImgRenderComponent, PositionComponent } from "./api/components";
+import { IVec } from "./api/contracts";
+import { ComponentBaseEntity } from "./api/entities";
+import { Stage } from "./api/stage";
 
 export function demo2(stage, gl, mushImg) {
   class MushEntity extends ComponentBaseEntity {

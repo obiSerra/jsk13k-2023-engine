@@ -1,13 +1,4 @@
-import { ComponentType, GameStateAPI, IComponent, IEntity, IStage, IVec, Sprite, SpriteAnimator } from "./contracts";
-import { mXs } from "./utils";
-
-const gravity = (e: IEntity, d: number) => {
-  if (!!e.mass) {
-    e.v[1] += Math.min(e.mass * 5, e.v[1] + mXs(e.mass, d));
-  }
-};
-
-const spriteAnimator = {};
+import { GameStateAPI, IComponent, IEntity, IStage, IVec } from "./contracts";
 
 export class ComponentBaseEntity implements IEntity {
   ID: string;
@@ -25,7 +16,6 @@ export class ComponentBaseEntity implements IEntity {
     this.componentList().forEach(c => this.initComponent(c.type));
   }
   initComponent(name: string) {
-    // console.log("init component", name);
     if (this.components[name].onInit) this.components[name].onInit(this);
   }
   componentList() {

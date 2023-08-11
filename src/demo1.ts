@@ -1,8 +1,8 @@
-import { resolveCollisionsComponent } from "./collisions";
-import { BoxColliderComponent, ImgRenderComponent, PositionComponent } from "./components";
-import { IVec } from "./contracts";
-import { ComponentBaseEntity } from "./entities";
-import { Stage } from "./stage";
+import { resolveCollisionsComponent } from "./api/collisions";
+import { BoxColliderComponent, ImgRenderComponent, PositionComponent } from "./api/components";
+import { IVec } from "./api/contracts";
+import { ComponentBaseEntity } from "./api/entities";
+import { Stage } from "./api/stage";
 
 export function demo1(stage, gl, mushImg) {
   class MushEntity extends ComponentBaseEntity {
