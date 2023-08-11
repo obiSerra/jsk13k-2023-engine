@@ -1,5 +1,15 @@
-import { IComponent, IVec, GameStateAPI, IEntity, ComponentType, Sprite, IStage } from "./contracts";
-import { Sound } from "./soundComponent";
+import {
+  IComponent,
+  IVec,
+  GameStateAPI,
+  IEntity,
+  ComponentType,
+  Sprite,
+  IStage,
+  Note,
+  NodeDataFixed,
+} from "./contracts";
+import { Sound, notes } from "./soundComponent";
 import { mXs } from "./utils";
 
 export class PositionComponent implements IComponent {
@@ -149,37 +159,6 @@ export class GravityComponent implements IComponent {
   }
 }
 
-const notes = [
-  {
-    C: 130.81,
-    "C#": 138.59,
-    D: 146.83,
-    "D#": 155.56,
-    E: 164.81,
-    F: 174.61,
-    "F#": 185,
-    G: 196,
-    "G#": 207.65,
-    A: 220,
-    "A#": 233.08,
-    B: 246.94,
-  },
-  {
-    C: 261.63,
-    "C#": 277.18,
-    D: 293.66,
-    "D#": 311.13,
-    E: 329.63,
-    F: 349.23,
-    "F#": 369.99,
-    G: 392,
-    "G#": 415.3,
-    A: 440,
-    "A#": 466.16,
-    B: 493.88,
-  },
-];
-
 const noteToTone = (note: string) => {
   const oct = note.replace(/.*([0-9]+).*/g, "$1");
   const tone = note.replace(/[0-9]/gi, "");
@@ -196,6 +175,7 @@ export class SoundComponent implements IComponent {
   type: ComponentType;
   sound: Sound;
   channels: number | (string | null)[];
+  volume: number = 0.5;
 
   constructor(channels: number | (string | null)[] = 3) {
     this.type = "sound";
@@ -203,30 +183,29 @@ export class SoundComponent implements IComponent {
     this.channels = channels;
   }
 
-  playChannel(channel: string, music: NoteComplete[]) {
+  playChannel(channel: string, music: NodeDataFixed[]) {
     music
-      .map(n => ({ ...n, pause: n?.pause || 0 }))
       .reduce(
-        (acc, v) => {
-          v.start = v?.start || acc.t;
-          acc.t += v.duration + v.pause;
+        (acc, v: NodeDataFixed) => {
+          v.s = v.s || acc.t;
+          acc.t += v.d + v.p;
           acc.n.push(v);
           return acc;
         },
-        { t: music[0].start || 0, n: [] }
+        { t: music[0].s, n: [] }
       )
-      .n.forEach((n, i) => {
-        const f = noteToTone(n.note);
+      .n.forEach((n: NodeDataFixed, i) => {
+        const f = noteToTone(n.n);
 
         setTimeout(() => {
-          this.sound.playNote(channel, f, n.duration, n.volume);
-        }, n.start);
+          this.sound.playNote(channel, f, n.d, this.volume);
+        }, n.s);
       });
   }
 
   play(music: Note[]) {
     const perChannel = music.reduce((acc, v: Note) => {
-      const ch = v.channel.toString() || "0";
+      const ch = v.c.toString() || "0";
       acc[ch] = acc[ch] || [];
       acc[ch].push(v);
       return acc;
@@ -238,15 +217,3 @@ export class SoundComponent implements IComponent {
     }
   }
 }
-export type Note = {
-  note: string;
-  duration: number;
-  volume: number;
-  pause?: number;
-  channel?: number;
-};
-export type NoteComplete = Note & {
-  pause: number;
-  channel: number;
-  start: number;
-};

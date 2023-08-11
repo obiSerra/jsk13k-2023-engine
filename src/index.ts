@@ -1,6 +1,6 @@
 import e = require("express");
 import "./assets/main.scss";
-import { IEntity, IVec, RenderFn } from "./contracts";
+import { IEntity, IVec, MusicSheet, NoteData, RenderFn } from "./contracts";
 import { demo1 } from "./demo1";
 import { demo2 } from "./demo2";
 import { demo3 } from "./demo3";
@@ -10,6 +10,7 @@ import { Stage } from "./stage";
 import { d } from "./dom";
 import { PositionComponent, ImgRenderComponent, BoxColliderComponent, SoundComponent } from "./components";
 import { ComponentBaseEntity } from "./entities";
+import { genMusicSheet } from "./soundComponent";
 
 class Menu {
   el: HTMLElement;
@@ -161,17 +162,17 @@ function demo4(stage: Stage, gl: GameLoop) {
       this.getComponent<SoundComponent>("sound").play(music);
     }
   }
-  const volume = 0.05;
 
-  const beat = (n: number) => n * 300;
+  
+  const musicSheet = genMusicSheet(300, [
+    { n: "G0", d: 2, p: 0.5, c: 1 },
+    { n: "G0", d: 2, p: 0.5, c: 2, s: 2.5 },
+    { n: "G0", d: 2, p: 0.5, c: 0, s: 5 },
+  ]);
 
-  const music = [
-    { note: "G0", duration: beat(6), volume, pause: beat(0.5), channel: 0, start: 0 },
-    { note: "G1", duration: beat(4), volume, pause: beat(0.5), channel: 1, start: beat(2) },
-    { note: "F1", duration: beat(3), volume, pause: beat(0.5), channel: 2, start: beat(3) },
-  ];
+  console.log(musicSheet);
 
   const musicEntity = new MusicEntity(stage);
 
-  musicEntity.play(music);
+  musicEntity.play(musicSheet);
 }

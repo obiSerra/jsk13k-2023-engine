@@ -82,3 +82,29 @@ export type ImagePxsRawMap = { [key: string]: ImagePxsRaw } | ColorMap;
 
 export type ImagePxs = (string | null)[][];
 export type ImagePxsMap = { [key: string]: ImagePxs };
+
+export type Note = {
+  n: string;
+  d: number;
+  p?: number;
+  c?: number;
+  s?: number;
+};
+
+export type NoteData = {
+  n: string;
+  d: number;
+  p?: number;
+  c?: number;
+  s?: number;
+};
+
+export type NodeDataFixed = {
+  n: string;
+  d: number;
+  p: number;
+  c: number;
+  s: number;
+};
+
+export type MusicSheet = NodeDataFixed[];

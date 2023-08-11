@@ -1,3 +1,36 @@
+import { NoteData, MusicSheet } from "./contracts";
+
+export const notes = [
+  {
+    C: 130.81,
+    "C#": 138.59,
+    D: 146.83,
+    "D#": 155.56,
+    E: 164.81,
+    F: 174.61,
+    "F#": 185,
+    G: 196,
+    "G#": 207.65,
+    A: 220,
+    "A#": 233.08,
+    B: 246.94,
+  },
+  {
+    C: 261.63,
+    "C#": 277.18,
+    D: 293.66,
+    "D#": 311.13,
+    E: 329.63,
+    F: 349.23,
+    "F#": 369.99,
+    G: 392,
+    "G#": 415.3,
+    A: 440,
+    "A#": 466.16,
+    B: 493.88,
+  },
+];
+
 export class SoundChannel {
   context: AudioContext;
   masterGainNode: GainNode;
@@ -52,3 +85,13 @@ export class Sound {
     this.channels[channel].playSound(freq, duration, volume);
   }
 }
+
+export const genMusicSheet = (beat: number, music: NoteData[]): MusicSheet => {
+  return music.map(n => ({
+    ...n,
+    d: n.d * beat,
+    p: (n?.p || 0) * beat,
+    s: (n?.s || 0) * beat,
+    c: n?.c || 0,
+  }));
+};
