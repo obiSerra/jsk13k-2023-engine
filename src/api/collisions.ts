@@ -33,30 +33,11 @@ export const resolveCollisions = (
           lp: [bXl, bYl],
         } = b.getComponent<PositionComponent>("position");
         const bBox = b.getComponent<BoxColliderComponent>("collider").box;
-        // const willCollide = isCollide(
-        //   [aX + mXs(aXv, 16), aY + mXs(aYv, 16)],
-        //   a.box,
-        //   [b.pos[0] + b.lastMv[0] * 1.5, b.pos[1] + b.lastMv[1] * 1.5],
-        //   b.box
-        // );
         const actualCollide = isCollide([aX, aY], aBox, [bX, bY], bBox);
         if (actualCollide && !!onCollide) {
           aCollide = true;
           onCollide(b);
         }
-
-        // if (actualCollide && a.v) {
-        //   let nPos: IVec = a.pos;
-        //   do {
-        //     const mvX = -a.lastMv[0] || 1;
-        //     const mvY = -a.lastMv[0] || 1;
-        //     nPos = [nPos[0] + mvX, nPos[1] + mvY];
-        //   } while (isCollide(nPos, a.box, [b.pos[0], b.pos[1]], b.box));
-        //   a.pos = nPos;
-        // } else if (!actualCollide && willCollide && a.v) {
-        //   // Trigger on Collide!!!!
-        //   a.onCollide(b);
-        // }
       }
     }
 

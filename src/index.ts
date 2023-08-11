@@ -1,7 +1,8 @@
-import { SoundComponent } from "./api/components";
+import { MenuComponent, SoundComponent } from "./api/components";
 import { RenderFn } from "./api/contracts";
 import { ComponentBaseEntity } from "./api/entities";
 import { GameLoop, INIT_ST, PAUSED_ST } from "./api/gameLoop";
+import { GameState } from "./api/gameState";
 import { Menu } from "./api/menu";
 import { preRender } from "./api/rendering";
 import { genMusicSheet } from "./api/soundComponent";
@@ -11,7 +12,12 @@ import { demo1 } from "./demo1";
 import { demo2 } from "./demo2";
 import { demo3 } from "./demo3";
 
+const stage = new Stage();
+const gl = new GameLoop(stage);
 
+const gameState = new GameState();
+gameState.stage = stage;
+gameState.gl = gl;
 
 //
 // -------------- All the folowing code is just for testing the engine -----------------------------
@@ -69,33 +75,30 @@ const mainMenu = new Menu(".main-menu");
 
 mainMenu.addOnClick("#demo1-run", e => {
   e.preventDefault();
-  demo1(stage, gl, mushImg);
+  demo1(gameState, mushImg);
   if (gl.state === INIT_ST) gl.start();
   else if (gl.state === PAUSED_ST) gl.resume();
 });
 
 mainMenu.addOnClick("#demo2-run", e => {
   e.preventDefault();
-  demo2(stage, gl, mushImg);
+  demo2(gameState, mushImg);
   if (gl.state === INIT_ST) gl.start();
   else if (gl.state === PAUSED_ST) gl.resume();
 });
 mainMenu.addOnClick("#demo3-run", e => {
   e.preventDefault();
-  demo3(stage, gl);
+  demo3(gameState);
   if (gl.state === INIT_ST) gl.start();
   else if (gl.state === PAUSED_ST) gl.resume();
 });
 mainMenu.addOnClick("#demo4-run", e => {
   e.preventDefault();
-  demo4(stage, gl);
+  demo4(gameState);
   if (gl.state === INIT_ST) gl.start();
   else if (gl.state === PAUSED_ST) gl.resume();
 });
 mainMenu.show();
-
-const stage = new Stage();
-const gl = new GameLoop(stage);
 
 const pause = document.querySelector(".pause");
 pause.addEventListener("click", e => {
@@ -116,47 +119,22 @@ gl.onPause(() => {
   mainMenu.show();
 });
 
-function demo4(stage: Stage, gl: GameLoop) {
+function demo4(gameState: GameState) {
+  const { stage } = gameState;
   class MusicEntity extends ComponentBaseEntity {
     constructor(stage: Stage) {
       const sound = new SoundComponent(["triangle", "sawtooth", "square"]);
+      const menu = new MenuComponent(".music-menu");
 
-      super(stage, [sound]);
+      menu.addListener("#sound1", e => this.play(genMusicSheet(300, [{ n: "G4", d: 2, p: 0.5, c: 1 }])));
+
+      super(stage, [sound, menu]);
       this.isColliding = false;
     }
     play(music): void {
-      // const music = [
-      //   { note: "G0", duration: beat(1), volume, pause: beat(0.5) },
-      //   { note: "G0", duration: beat(1), volume, pause: beat(0.5) },
-      //   { note: "G0", duration: beat(1), volume, pause: beat(0.5) },
-      //   { note: "D#0", duration: beat(1.2), volume },
-      //   { note: "A#0", duration: beat(0.3), volume, pause: beat(0.5) },
-      //   { note: "G0", duration: beat(1), volume },
-      //   { note: "D#0", duration: beat(1.2), volume },
-      //   { note: "A#0", duration: beat(0.3), volume },
-      //   { note: "G0", duration: beat(1), volume, pause: beat(0.5) },
-      //   { note: "D1", duration: beat(1), volume },
-      //   { note: "D1", duration: beat(1), volume },
-      //   { note: "D1", duration: beat(1), volume },
-      //   // { note: "D#0", duration: beat(1.2), volume },
-      //   // { note: "A#0", duration: beat(0.3), volume },
-      //   // { note: "D#0", duration: beat(1), volume },
-      // ];
-
       this.getComponent<SoundComponent>("sound").play(music);
     }
   }
-
   
-  const musicSheet = genMusicSheet(300, [
-    { n: "G0", d: 2, p: 0.5, c: 1 },
-    { n: "G0", d: 2, p: 0.5, c: 2, s: 2.5 },
-    { n: "G0", d: 2, p: 0.5, c: 0, s: 5 },
-  ]);
-
-  console.log(musicSheet);
-
-  const musicEntity = new MusicEntity(stage);
-
-  musicEntity.play(musicSheet);
+  gameState.setEntities([new MusicEntity(stage)]);
 }

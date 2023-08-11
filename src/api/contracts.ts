@@ -1,12 +1,13 @@
 export type IVec = [number, number];
 
-export type ComponentType = "position" | "control" | "collider" | "render" | "gravity" | "sound";
+export type ComponentType = "position" | "control" | "collider" | "render" | "gravity" | "sound" | "menu";
 
 export interface IComponent {
   type: ComponentType;
   onInit?(e: IEntity): void;
   onRender?(e: IEntity, delta: number): void;
   onUpdate?(e: IEntity, delta: number, gameState?: GameStateAPI): void;
+  onTerminate?(e: IEntity): void;
 }
 
 export interface RenderComponent extends IComponent {
@@ -105,3 +106,5 @@ export type NodeDataFixed = {
 };
 
 export type MusicSheet = NodeDataFixed[];
+
+export type NoteFrequencies = { [k: string]: number };

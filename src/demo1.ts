@@ -2,9 +2,12 @@ import { resolveCollisions } from "./api/collisions";
 import { BoxColliderComponent, ImgRenderComponent, PositionComponent } from "./api/components";
 import { IVec } from "./api/contracts";
 import { ComponentBaseEntity } from "./api/entities";
+import { GameState } from "./api/gameState";
 import { Stage } from "./api/stage";
 
-export function demo1(stage, gl, mushImg) {
+export function demo1(gameState: GameState, mushImg) {
+  gameState.setEntities([]);
+  const { stage, gl } = gameState;
   class MushEntity extends ComponentBaseEntity {
     isColliding: boolean;
     constructor(stage: Stage, p: IVec) {
@@ -38,24 +41,29 @@ export function demo1(stage, gl, mushImg) {
       super.update(d);
     }
   }
-  const entities = [];
 
   const entitiesNum = 200;
   for (let i = 0; i < entitiesNum; i++) {
     const p: IVec = [Math.floor(Math.random() * stage.canvas.width), Math.floor(Math.random() * stage.canvas.height)];
     const anim = new MushEntity(stage, p);
 
-    entities.push(anim);
+    gameState.addEntity(anim);
   }
 
   gl.onUpdate(delta => {
-    const canCollide = entities.filter(e => !!e.components["collider"]);
+    const canCollide = gameState.getEntities().filter(e => !!e.components["collider"]);
 
     // to update
     resolveCollisions(canCollide);
-    entities.filter(e => typeof e.update === "function").forEach(e => e.update(delta));
+    gameState
+      .getEntities()
+      .filter(e => typeof e.update === "function")
+      .forEach(e => e.update(delta));
   });
   gl.onRender(t => {
-    entities.filter(e => typeof e.render === "function").forEach(e => e.render(t));
+    gameState
+      .getEntities()
+      .filter(e => typeof e.render === "function")
+      .forEach(e => e.render(t));
   });
 }

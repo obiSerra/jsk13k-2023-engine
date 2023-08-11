@@ -9,7 +9,7 @@ import {
   Note,
   NodeDataFixed,
 } from "./contracts";
-import { Sound, notes } from "./soundComponent";
+import { Sound, noteFrequencies } from "./soundComponent";
 import { mXs } from "./utils";
 
 export class PositionComponent implements IComponent {
@@ -56,6 +56,7 @@ export class BoxColliderComponent implements IComponent {
     this.onCollide = this.onCollideFn?.bind(e) || null;
   }
 
+  // TODO Debug code, remove before release
   onRender(e: IEntity, delta: number): void {
     const [w, h] = this.box;
     const pos = (e.components["position"] as PositionComponent).p;
@@ -81,12 +82,12 @@ export class SpriteRenderComponent implements IComponent {
   constructor(sprite: Sprite, defaultAnimation: string) {
     this.type = "render";
     this.sprite = sprite;
-    this.triggerAnimation(defaultAnimation);
+    this.setupAnimation(defaultAnimation);
   }
   onInit(e: IEntity): void {
     this.stage = e.stage;
   }
-  triggerAnimation(animationName: string) {
+  setupAnimation(animationName: string) {
     this.time = 0;
     this.currentFrame = 0;
     this.currentAnimation = animationName;
@@ -112,10 +113,11 @@ export class SpriteRenderComponent implements IComponent {
       an.frames[this.currentFrame].width,
       an.frames[this.currentFrame].height
     );
-    ctx.strokeStyle = "red";
-    ctx.moveTo(x, y);
-    ctx.arc(x, y, 2, 0, 2 * Math.PI);
-    ctx.stroke();
+
+    ctx.strokeStyle = "red"; // TODO Debug code, remove before release
+    ctx.moveTo(x, y); // TODO Debug code, remove before release
+    ctx.arc(x, y, 2, 0, 2 * Math.PI); // TODO Debug code, remove before release
+    ctx.stroke(); // TODO Debug code, remove before release
     ctx.closePath();
   }
 }
@@ -160,10 +162,7 @@ export class GravityComponent implements IComponent {
 }
 
 const noteToTone = (note: string) => {
-  const oct = note.replace(/.*([0-9]+).*/g, "$1");
-  const tone = note.replace(/[0-9]/gi, "");
-  const freqs = notes[parseInt(oct)] || notes[0];
-  const freq = freqs[tone];
+  const freq = noteFrequencies[note];
   if (typeof freq === "undefined") {
     console.error(`Note ${note} not found`);
     return 0;
@@ -215,5 +214,45 @@ export class SoundComponent implements IComponent {
       const channelMusic = perChannel[k];
       this.playChannel(k, channelMusic);
     }
+  }
+}
+
+export class MenuComponent implements IComponent {
+  type: ComponentType;
+  selector: string;
+
+  el: HTMLElement;
+  behavior: { [key: string]: { cb: (e: Event) => void; t: string } } = {};
+  removers: { [key: string]: { cb: (e: Event) => void; t: string } } = {};
+
+  constructor(selector: string) {
+    this.type = "menu";
+    this.selector = selector;
+    this.el = document.querySelector(selector);
+    console.log("OIOIOIOIOIOI");
+  }
+  addListener(sel: string, cb: (e: Event) => void, eventType: string = "click") {
+    this.behavior[sel] = { cb, t: eventType };
+  }
+  onInit(e: IEntity): void {
+    console.log("INIT")
+    for (let k of Object.keys(this.behavior)) {
+      const el = this.el.querySelector(k);
+      const b = this.behavior[k];
+      if (!el) continue;
+      el.addEventListener(b.t, b.cb);
+    }
+    this.show();
+  }
+
+  show() {
+    console.log("SHOW");
+    this.el.classList.remove("h");
+  }
+  hide() {
+    this.el.classList.add("h");
+  }
+  onTerminate(e: IEntity): void {
+    this.hide();
   }
 }

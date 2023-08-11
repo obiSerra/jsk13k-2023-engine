@@ -2,34 +2,10 @@ import { resolveCollisions } from "./api/collisions";
 import { BoxColliderComponent, PositionComponent, SpriteRenderComponent } from "./api/components";
 import { ComponentType, GameStateAPI, IComponent, IEntity, IStage, Sprite } from "./api/contracts";
 import { ComponentBaseEntity } from "./api/entities";
+import { GameState } from "./api/gameState";
 import { flipImage, genDrawCharacter, hydrateImage, preRender } from "./api/rendering";
 import { Stage } from "./api/stage";
 import { images } from "./pxImages/testImage";
-
-class GameState {
-  status: string = "loading";
-  entities: { [key: string]: IEntity } = {};
-  stage: Stage;
-
-  addEntity(e: IEntity) {
-    this.entities[e.ID] = e;
-  }
-  removeEntity(e: IEntity) {
-    delete this.entities[e.ID];
-  }
-  getEntities() {
-    return Object.values(this.entities);
-  }
-
-  stateAPI(): GameStateAPI {
-    return {
-      addEntity: this.addEntity.bind(this),
-      removeEntity: this.removeEntity.bind(this),
-      getEntities: this.getEntities.bind(this),
-      getStage: () => this.stage,
-    };
-  }
-}
 
 // This is a basic Control Component
 export class BaseControlComponent implements IComponent {
@@ -97,22 +73,22 @@ class DemoPlayer extends ComponentBaseEntity {
   walkLeft() {
     const pos = this.components["position"] as PositionComponent;
     const rend = this.components["render"] as SpriteRenderComponent;
-    if (rend.currentAnimation !== "run") rend.triggerAnimation("run");
+    if (rend.currentAnimation !== "run") rend.setupAnimation("run");
     pos.p[0] -= 10;
     pos.direction = 1;
   }
   walkRight() {
     const pos = this.components["position"] as PositionComponent;
     const rend = this.components["render"] as SpriteRenderComponent;
-    if (rend.currentAnimation !== "runRight") rend.triggerAnimation("runRight");
+    if (rend.currentAnimation !== "runRight") rend.setupAnimation("runRight");
     pos.p[0] += 10;
     pos.direction = -1;
   }
   stand() {
     const pos = this.components["position"] as PositionComponent;
     const rend = this.components["render"] as SpriteRenderComponent;
-    if (pos.direction === 1 && rend.currentAnimation !== "idle") rend.triggerAnimation("idle");
-    if (pos.direction === -1 && rend.currentAnimation !== "idleRight") rend.triggerAnimation("idleRight");
+    if (pos.direction === 1 && rend.currentAnimation !== "idle") rend.setupAnimation("idle");
+    if (pos.direction === -1 && rend.currentAnimation !== "idleRight") rend.setupAnimation("idleRight");
   }
 }
 
@@ -154,7 +130,10 @@ class EnemyEntity extends ComponentBaseEntity {
 //   }
 // }
 
-export function demo3(stage, gl) {
+export function demo3(gameState: GameState) {
+  gameState.setEntities([]);
+  const { stage, gl } = gameState;
+  const stateAPI = gameState.stateAPI();
   // Prepare images and sprites
 
   const boltIdr = hydrateImage(images, "bolt");
@@ -194,30 +173,26 @@ export function demo3(stage, gl) {
     runRight: { frames: [run3, run4], changeTime: 100 },
   };
 
-  const state = new GameState();
-  state.stage = stage;
-  const stateAPI = state.stateAPI();
-
   // Add character
   const player = new DemoPlayer(stage, charSprite);
-  state.addEntity(player);
+  gameState.addEntity(player);
 
   const enemy = new EnemyEntity(stage, charSprite);
-  state.addEntity(enemy);
+  gameState.addEntity(enemy);
 
   gl.onUpdate(delta => {
-    const canCollide = state.getEntities().filter(e => !!e.components["collider"]);
+    const canCollide = gameState.getEntities().filter(e => !!e.components["collider"]);
 
     // to update
     resolveCollisions(canCollide);
-    state
+    gameState
       .getEntities()
       .filter(e => typeof e.update === "function")
       .forEach(e => e.update(delta, stateAPI));
   });
 
   gl.onRender(t => {
-    state
+    gameState
       .getEntities()
       .filter(e => typeof e.render === "function")
       .forEach(e => e.render(t));

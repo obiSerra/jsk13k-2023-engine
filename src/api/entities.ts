@@ -48,6 +48,8 @@ export class ComponentBaseEntity implements IEntity {
     throw new Error("Method not implemented.");
   }
   destroy() {
-    throw new Error("Method not implemented.");
+    this.componentList().forEach(c => {
+      c?.onTerminate && c?.onTerminate(this);
+    });
   }
 }
